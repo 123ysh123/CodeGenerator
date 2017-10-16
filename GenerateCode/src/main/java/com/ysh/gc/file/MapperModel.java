@@ -9,8 +9,8 @@ import static java.util.stream.Collectors.joining;
 
 import java.io.File;
 
-import com.ysh.gc.core.MapperMethod;
 import com.ysh.gc.core.data.MapperData;
+import com.ysh.gc.core.data.MapperMethod;
 import com.ysh.gc.core.data.MethodData;
 
 public class MapperModel implements Model{
@@ -22,6 +22,7 @@ public class MapperModel implements Model{
 
 	public String parse() {
 		String imports = data.getImports().stream()
+				.distinct()
 				.map(item -> "import " + item + ";")
 				.collect(joining("\n", "\n", "\n"));
 		

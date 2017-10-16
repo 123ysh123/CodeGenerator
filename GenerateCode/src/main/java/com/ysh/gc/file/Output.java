@@ -6,8 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import com.ysh.gc.core.data.EntityData;
-
 public class Output {
 	
 	public static <T extends Model> void output(OutputFile<T> output) throws IOException {

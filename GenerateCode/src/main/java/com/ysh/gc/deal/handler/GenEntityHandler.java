@@ -2,6 +2,7 @@ package com.ysh.gc.deal.handler;
 
 import static com.ysh.gc.deal.StringUtils.cutHead;
 import static com.ysh.gc.deal.StringUtils.cutTail;
+import static com.ysh.gc.deal.Utils.containsIgnoreCase;
 import static com.ysh.gc.deal.Utils.getDesktopPath;
 import static com.ysh.gc.deal.Utils.toClassName;
 import static com.ysh.gc.deal.Utils.toImportPath;
@@ -10,7 +11,9 @@ import static java.util.stream.Collectors.toList;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.ysh.gc.core.LinkDB;
@@ -30,6 +33,8 @@ import com.ysh.gc.file.OutputFile;
  */
 public class GenEntityHandler implements Handler {
 	private String command;
+	
+	public static final Map<String, List<String>> GENERATED_ITEMS = new HashMap<>();
 
 	@Override
 	public Response execute(String command) {
@@ -54,7 +59,12 @@ public class GenEntityHandler implements Handler {
 			}
 			
 			Output.output(entityFile);
-			saveEntity(table, toImportPath(path) + "." + entityFile.getFileName().replace(".java", ""));
+			saveEntity(table.toLowerCase(), toImportPath(path) + "." + entityFile.getFileName().replace(".java", ""));
+			
+			List<String> savedColumns = data.getColumns().stream()
+					.map(column -> column.getName())
+					.collect(toList());
+			GENERATED_ITEMS.put(table.toLowerCase(), savedColumns);
 			
 		} catch (SQLException | IOException e) {
 			return new Response(Status.ERROR_EXCUTE, e.getMessage());
@@ -94,7 +104,7 @@ public class GenEntityHandler implements Handler {
 			
 			List<String> columns = Arrays.asList(temp.split(" "));
 			List<Column> columnList = data.getColumns().stream()
-					.filter(item -> !columns.contains(item.getName())).collect(toList());
+					.filter(item -> !containsIgnoreCase(columns, item.getName())).collect(toList());
 			data.setColumns(columnList);
 			return data;
 		}
@@ -105,7 +115,7 @@ public class GenEntityHandler implements Handler {
 			
 			List<String> columns = Arrays.asList(temp.split(" "));
 			List<Column> columnList = data.getColumns().stream()
-					.filter(item -> columns.contains(item.getName())).collect(toList());
+					.filter(item -> containsIgnoreCase(columns, item.getName())).collect(toList());
 			data.setColumns(columnList);
 			return data;
 		}

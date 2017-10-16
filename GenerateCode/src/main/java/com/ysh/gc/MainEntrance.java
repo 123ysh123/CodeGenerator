@@ -21,33 +21,46 @@ public class MainEntrance {
 		while (!(command = scan.nextLine()).equals("exit") && command.length() > 0) {
 			if (command.equals("help")) {
 				printCommand();
+				continue;
 			}
 			if (command.equals("show methods")) {
 				printMethod();
+				continue;
 			}
 			
 			Response response = null;
 			if (command.startsWith("link database")) {
 				response = new LinkDBHandler().execute(command);
+				dealResponse(response);
+				continue;
 			}
 			if (command.startsWith("use") || command.equals("show links")) {
 				response = new UserCustomHandler().execute(command);
+				dealResponse(response);
+				continue;
 			}
 			if (command.startsWith("gen entity")) {
 				response = new GenEntityHandler().execute(command);
+				dealResponse(response);
+				continue;
 			}
 			if (command.startsWith("gen mapper")) {
 				response = new GenMapperHandler().execute(command);
+				dealResponse(response);
+				continue;
 			}
-			
-			if (response.getStatus() == Status.OK) {
-				System.out.println("ok");
-			} else {
-				System.out.println(response.getMsg());
-			}
-			
+			System.out.println("error command!");
 		}
 	}
+
+	private static void dealResponse(Response response) {
+		if (response.getStatus() == Status.OK) {
+			System.out.println("ok");
+		} else {
+			System.out.println(response.getMsg());
+		}
+	}
+	
 	private static void welcome() {
 		System.out.println("*************************************************");
 		System.out.println("*               ^_^欢迎使用代码生成器^_^              *");

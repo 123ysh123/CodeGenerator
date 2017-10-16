@@ -6,6 +6,8 @@ import static com.ysh.gc.deal.ImportUtil.getImport;
 import static com.ysh.gc.deal.StringUtils.cutHead;
 import static com.ysh.gc.deal.StringUtils.cutTail;
 import static com.ysh.gc.deal.StringUtils.matches;
+import static com.ysh.gc.deal.Utils.containsIgnoreCase;
+import static com.ysh.gc.deal.Utils.getIgnoreCase;
 import static com.ysh.gc.deal.Utils.splitCamel;
 import static com.ysh.gc.deal.Utils.toFieldName;
 import static java.util.stream.Collectors.toList;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ysh.gc.core.MethodType;
+import com.ysh.gc.deal.ImportUtil;
 import com.ysh.gc.exception.NoSuchColumnException;
 import com.ysh.gc.exception.UnSupportedMethodException;
 
@@ -102,11 +105,11 @@ public class MapperData extends EntityData{
 				
 				for(int i=1; i<strs.length; i++) {
 					String param = inputParams.get(i - 1);
-					if (!columnNames.contains(strs[i])) {
+					if (!containsIgnoreCase(columnNames, strs[i])) {
 						throw new NoSuchColumnException("no such column '" + strs[i] + "'");
 					}
 					
-					paramItems.put(param, nameColumnMap.get(strs[i]));
+					paramItems.put(param, getIgnoreCase(nameColumnMap, strs[i]));
 					
 					if (param.contains("list")) {
 						imports.add(getImport("List"));
@@ -114,11 +117,14 @@ public class MapperData extends EntityData{
 					if (matches(methodName, "selectBy\\w+")) {
 						imports.add(fullClssName);
 						if (!methodName.equals("selectById")) {
-							imports.add("List");
+							imports.add(getImport("List"));
 						}
 					}
 				}
 				
+				if (paramItems.size() > 1) {
+					imports.add(getImport("Param"));
+				}
 				data.setParams(paramItems);
 				data.setReturns(new HashMap<>());
 				methodDatas.add(data);
@@ -141,30 +147,31 @@ public class MapperData extends EntityData{
 				}
 				
 				for (int i=0; i<returns.size(); i++) {
-					if (!columnNames.contains(strs[i + 1])) {
+					if (!containsIgnoreCase(columnNames, strs[i + 1])) {
 						throw new NoSuchColumnException("no such column '" + strs[i + 1] + "'");
 					}
-					returnItems.put(returns.get(i), nameColumnMap.get(strs[i + 1]));
-					
-					if (!matches(methodName, "select\\w+ById")) {
-						imports.add(getImport("List"));
-					}
-					if (returns.size() == 2) {
-						imports.add(getImport("Map"));
-					}
+					returnItems.put(returns.get(i), getIgnoreCase(nameColumnMap, strs[i + 1]));
+				}
+				
+				if (!matches(methodName, "select\\w+ById") && !matches(methodName, "update\\w+By\\w+")) {
+					imports.add(getImport("List"));
+				}
+				if (returns.size() == 2 && !matches(methodName, "update\\w+By\\w+")) {
+					imports.add(getImport("Map"));
 				}
 				
 				for (int i=0; i<params.size(); i++) {
-					if (!columnNames.contains(strs[returns.size() + 1 + i])) {
+					if (!containsIgnoreCase(columnNames, strs[returns.size() + 1 + i])) {
 						throw new NoSuchColumnException("no such column '" + strs[returns.size() + 1 + i] + "'");
 					}
-					paramItems.put(params.get(i), nameColumnMap.get(strs[returns.size() + i + 1]));
+					paramItems.put(params.get(i), getIgnoreCase(nameColumnMap, strs[returns.size() + i + 1]));
 					if (params.get(i).contains("list")) {
 						imports.add(getImport("List"));
 					}
-					if (params.size() > 1) {
-						imports.add("Param");
-					}
+				}
+				
+				if (params.size() > 1) {
+					imports.add(getImport("Param"));
 				}
 				data.setReturns(returnItems);
 				data.setParams(paramItems);
@@ -175,18 +182,20 @@ public class MapperData extends EntityData{
 			throw new UnSupportedMethodException("method name '"+ methodName +"' invalid");
 		}
 		
-		List<Column> allColumns = new ArrayList<>();
 		for (MethodData methodData : methodDatas) {
-			allColumns.addAll(methodData.getParams().values());
-			allColumns.addAll(methodData.getReturns().values());
-		}
-		for (Column column : allColumns) {
-			String javaType = getJavaType(column.getType());
-			if ("Date".equals(javaType) || "BigDecimal".equals(javaType)) {
-				imports.add(getImport(javaType));
+			List<String> types = new ArrayList<>();
+			if (!methodData.isAllColomn()) {
+				types = methodData.getParams().values().stream()
+						.map(column -> getJavaType(column.getType())).collect(toList());
 			}
+				
+			if (methodData.getReturns().size() == 1) {
+				String returnType = methodData.getReturns().values().stream().findFirst().get().getType();
+				returnType = getJavaType(returnType);
+				types.add(returnType);
+			}
+			imports.addAll(ImportUtil.getImports(types));
 		}
-		imports = imports.stream().distinct().collect(toList());
 	}
 	
 }

@@ -37,17 +37,17 @@ public class PropertyUtil {
 	
 	public Optional<String> get(String key) {
 		String value = properties.getProperty(key);
-		return Optional.ofNullable(value);
+		return Optional.ofNullable(value.trim());
 	}
 	
 	public void set(String key, String value) {
 		OutputStream outputStream;
 		try {
-			outputStream = new FileOutputStream(PropertyUtil.class.getClassLoader().getResource(file).getPath());
+			String classpathFile = PropertyUtil.class.getClassLoader().getResource(file).getPath();
+			String sourceFile = classpathFile.replace("target/classes", "src\\main\\resources");
+			outputStream = new FileOutputStream(sourceFile);
 			properties.setProperty(key, value);
-			properties.store(outputStream, "");
-			outputStream.flush();
-			outputStream.close();
+			properties.store(outputStream, Utils.getCurrentDate());
 		} catch (IOException e) {
 			System.out.println("error:" + e.getMessage());
 		}

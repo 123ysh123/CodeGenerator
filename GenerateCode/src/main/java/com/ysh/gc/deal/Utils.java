@@ -1,19 +1,18 @@
 package com.ysh.gc.deal;
 
 import static com.ysh.gc.deal.StringUtils.cutHead;
-import static com.ysh.gc.deal.StringUtils.cutTail;
-import static com.ysh.gc.deal.StringUtils.matches;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.swing.filechooser.FileSystemView;
-
-import com.ysh.gc.exception.UnSupportedMethodException;
 
 public class Utils {
 	public static String getDesktopPath() {
@@ -56,12 +55,13 @@ public class Utils {
 		if (source.contains("_")) {
 			String[] str = source.split("_");
 			source = Arrays.asList(str).stream()
-					.map(item -> item.substring(0, 1).toUpperCase() + item.substring(1)).collect(Collectors.joining());
+					.map(item -> {
+						String temp = item.toLowerCase();
+						return temp.substring(0, 1).toUpperCase() + temp.substring(1);})
+					.collect(Collectors.joining());
 		}
-		if (source.contains("-")) {
-			String[] str = source.split("-");
-			source = Arrays.asList(str).stream()
-					.map(item -> item.substring(0, 1).toUpperCase() + item.substring(1)).collect(Collectors.joining());
+		if (source.length() <= 3) {
+			source = source.toLowerCase();
 		}
 		return source;
 	}
@@ -86,5 +86,26 @@ public class Utils {
 		return list;
 	}
 	
+	public static <T extends Collection<String>> boolean containsIgnoreCase(T collection, String content) {
+		for (String item : collection) {
+			if (content.equalsIgnoreCase(item)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
+	public static <V,T extends Map<String, V>> V getIgnoreCase(T map, String key) {
+		for (Entry<String, V> entity : map.entrySet()) {
+			if (key.equalsIgnoreCase(entity.getKey())) {
+				return entity.getValue();
+			}
+		}
+		return null;
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(toCamel("SN_shop"));
+		System.out.println("SN".toLowerCase());
+	}
 }

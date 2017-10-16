@@ -13,6 +13,7 @@ import static com.ysh.gc.file.MapperConstants.RESULT;
 import static com.ysh.gc.file.MapperConstants.RETURN_ID;
 import static com.ysh.gc.file.MapperConstants.SELECT;
 import static com.ysh.gc.file.MapperConstants.UPDATE;
+import static com.ysh.gc.file.MapperConstants.FOREACH;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -128,7 +129,7 @@ public class MapperXmlModel implements Model{
 		
 		if (methodName.equals("select")) {
 			where = getMutableWhere(methodData);
-			statement.replace("WHERE ", "");
+			statement = statement.replace("WHERE ", "");
 		} 
 		if (matches(methodName, "select\\w+By\\w+")) {
 			if (methodData.getReturns().size() == 1) {
@@ -137,7 +138,7 @@ public class MapperXmlModel implements Model{
 				columns = column.getName();
 			}
 			if (methodData.getReturns().size() == 2) {
-				columns = methodData.getParams().entrySet().stream()
+				columns = methodData.getReturns().entrySet().stream()
 						.map(entry -> entry.getValue().getName())
 						.collect(joining(","));
 				resultType = "resultType=\"map\"";
@@ -145,7 +146,7 @@ public class MapperXmlModel implements Model{
 		}
 		if (matches(methodName, "selectCountBy\\w+")) {
 			columns = "COUNT(1)";
-			resultType = "int";
+			resultType = "resultType=\"int\"";
 		}
 		
 		statement = statement.replace("#{column}", columns)
@@ -166,8 +167,8 @@ public class MapperXmlModel implements Model{
 					.filter(item -> !item.getKey().equalsIgnoreCase("id"))
 					.map(entry -> CONDITION.replace("#{test}", entry.getKey())
 							.replace("#{operate}", entry.getValue().getName() + "=#{" + entry.getKey() + "},"))
-					.collect(joining("","<set>","\n\t\t<set>"));
-			statement.replace("SET ", "");
+					.collect(joining("","<set>","\n\t\t</set>"));
+			statement = statement.replace("SET ", "");
 			where = "id=#{id}";
 		}
 		
@@ -192,13 +193,18 @@ public class MapperXmlModel implements Model{
 
 	private String getWhere(MethodData methodData) {
 		String where = methodData.getParams().entrySet().stream()
-				.map(entry -> entry.getValue().getName() + "=#{" + entry.getKey() + "}")
+				.map(entry -> {
+					if (entry.getKey().contains("list")) {
+						return entry.getValue().getName() + " IN" + FOREACH.replace("#{collection}", entry.getKey());
+					}
+					return entry.getValue().getName() + "=#{" + entry.getKey() + "}";})
 				.collect(joining(" AND "));
 		return where;
 	}
 
 	private String getMutableWhere(MethodData methodData) {
-		String where = methodData.getParams().entrySet().stream().map(entry -> CONDITION.replace("#{test}", entry.getKey())
+		String where = methodData.getParams().entrySet().stream()
+				.map(entry -> CONDITION.replace("#{test}", entry.getKey())
 				.replace("#{operate}", "AND " + entry.getValue().getName() + "=#{" + entry.getKey() + "}"))
 				.collect(joining("", "<where>", "\n\t\t</where>"));
 		return where;

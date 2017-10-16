@@ -1,4 +1,4 @@
-package com.ysh.gc.core;
+package com.ysh.gc.core.data;
 
 import static com.ysh.gc.core.SqlType.getJavaType;
 import static com.ysh.gc.deal.StringUtils.matches;
@@ -8,8 +8,7 @@ import static com.ysh.gc.deal.Utils.toShortClassName;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.ysh.gc.core.data.Column;
-import com.ysh.gc.core.data.MethodData;
+import com.ysh.gc.core.MethodType;
 
 public class MapperMethod {
 	private String return_;
@@ -88,12 +87,12 @@ public class MapperMethod {
 						:name.equals("insertBatch")?"批量插入":"插入并返回key(id)";
 			case SELECT:
 				if (data.isAllColomn()) {
-					return "根据" + prefix + "查询记录";
+					return "根据实体类查询记录";
 				}
 				return "根据" + prefix + "查询" + after;
 			case UPDATE:
 				if (data.isAllColomn()) {
-					return "根据" + prefix + "更改记录";
+					return "根据实体类更改记录";
 				}
 				return "根据" + prefix + "更改" + after;
 			case DELETE:

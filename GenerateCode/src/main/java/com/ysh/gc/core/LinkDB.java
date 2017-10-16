@@ -67,7 +67,7 @@ public class LinkDB {
     
     static public EntityData getEntity(String tableName) throws SQLException {
     	if (metadata == null) {
-			throw new DatabaseNotLinkException();
+    		throw new DatabaseNotLinkException("database is not linked");
 		}
     	ResultSet tableSet = metadata.getTables(conn.getCatalog(), null, tableName, new String[]{"TABLE"});
     	Table table = null;

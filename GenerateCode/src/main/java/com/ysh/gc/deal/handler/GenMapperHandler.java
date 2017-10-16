@@ -4,10 +4,10 @@ import static com.ysh.gc.deal.StringUtils.cutHead;
 import static com.ysh.gc.deal.StringUtils.cutTail;
 import static com.ysh.gc.deal.Utils.getDesktopPath;
 import static com.ysh.gc.deal.Utils.toClassName;
-import static com.ysh.gc.deal.Utils.toFieldName;
+import static com.ysh.gc.deal.Utils.containsIgnoreCase;
+import static com.ysh.gc.deal.handler.GenEntityHandler.GENERATED_ITEMS;
 import static java.util.stream.Collectors.toList;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,22 +43,17 @@ public class GenMapperHandler implements Handler {
 			Optional<String> aliasOpt = getAlias();
 			List<String> methodStrs = getMethods();
 			
-			@SuppressWarnings("rawtypes")
-			Class clazz = Class.forName(fullEntityName);
-			Field[] fields = clazz.getDeclaredFields();
-			
-			List<String> fieldStrs = new ArrayList<>();
-			for (Field field : fields) {
-				fieldStrs.add(field.getName());
+			List<String> savedItems = GENERATED_ITEMS.get(tableName.toLowerCase());
+			if (savedItems != null) {
+				List<Column> columns = entityData.getColumns().stream()
+						.filter(column -> containsIgnoreCase(savedItems, column.getName()))
+						.collect(toList());
+				entityData.setColumns(columns);
 			}
-			
-			List<Column> columns = entityData.getColumns().stream()
-					.filter(item -> fieldStrs.contains(toFieldName(item.getName())))
-					.collect(toList());
 			
 			MapperData mapperData = new MapperData();
 			mapperData.setTable(entityData.getTable());
-			mapperData.setColumns(columns);
+			mapperData.setColumns(entityData.getColumns());
 			mapperData.setFullClssName(fullEntityName);
 			mapperData.setPath(getPath());
 			mapperData.init(methodStrs);
@@ -73,16 +68,14 @@ public class GenMapperHandler implements Handler {
 				mapperFile.setFileName(toClassName(aliasOpt.get()) + ".java");
 				mapperXmlFile.setFileName(toClassName(aliasOpt.get()) + ".xml");
 			}else {
-				mapperData.setName(toClassName(entityData.getTable().getName()));
-				mapperFile.setFileName(toClassName(entityData.getTable().getName()) + ".java");
-				mapperXmlFile.setFileName(toClassName(entityData.getTable().getName()) + ".xml");
+				mapperData.setName(toClassName(entityData.getTable().getName()) + "Mapper");
+				mapperFile.setFileName(toClassName(entityData.getTable().getName()) + "Mapper.java");
+				mapperXmlFile.setFileName(toClassName(entityData.getTable().getName()) + "Mapper.xml");
 			}
 			
 			Output.append(mapperFile, "}");
 			Output.append(mapperXmlFile, "</mapper>");
 			
-		} catch (ClassNotFoundException e) {
-			return new Response(Status.ERROR_EXCUTE, "'" + tableName + "' deleted or moved");
 		} catch (Exception e) {
 			return new Response(Status.ERROR_EXCUTE, e.getMessage());
 		}
@@ -130,7 +123,7 @@ public class GenMapperHandler implements Handler {
 	
 	private String getSavedEntity(String table) {
 		PropertyUtil property = new PropertyUtil(PropertyUtil.GEN_ENTITY);
-		Optional<String> entityOpt = property.get(table);
+		Optional<String> entityOpt = property.get(table.toLowerCase());
 		return entityOpt.orElseThrow(() -> new EntityNotGeneratedException("entity '" + table + "' not generated"));
 	}
 }
