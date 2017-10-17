@@ -73,21 +73,21 @@ public class GenEntityHandler implements Handler {
 	}
 	
 	private String getTable() {
-		String table = cutHead(command, "entity");
-		table = cutTail(table, "as");
-		table = cutTail(table, "in");
-		table = cutTail(table, "not");
-		table = cutTail(table, "to");
+		String table = cutHead(command, " entity ");
+		table = cutTail(table, " as ");
+		table = cutTail(table, " in ");
+		table = cutTail(table, " not ");
+		table = cutTail(table, " to ");
 		
 		return table;
 	}
 	
 	private Optional<String> getAlias() {
-		if (command.contains("as")) {
-			String alias = cutHead(command, "as");
-			alias = cutTail(alias, "in");
-			alias = cutTail(alias, "not");
-			alias = cutTail(alias, "to");
+		if (command.contains(" as ")) {
+			String alias = cutHead(command, " as ");
+			alias = cutTail(alias, " in ");
+			alias = cutTail(alias, " not ");
+			alias = cutTail(alias, " to ");
 			
 			return Optional.of(alias);
 		}
@@ -97,10 +97,10 @@ public class GenEntityHandler implements Handler {
 	private EntityData getEntityData(String table) throws SQLException {
 		EntityData data =LinkDB.getEntity(table);
 		
-		String cutCommand = cutTail(command, "to");
-		if (cutCommand.contains("not in")) {
-			String temp = cutHead(cutCommand, "not in");
-			temp = cutTail(temp, "to");
+		String cutCommand = cutTail(command, " to ");
+		if (cutCommand.contains(" not in ")) {
+			String temp = cutHead(cutCommand, " not in ");
+			temp = cutTail(temp, " to ");
 			
 			List<String> columns = Arrays.asList(temp.split(" "));
 			List<Column> columnList = data.getColumns().stream()
@@ -109,9 +109,9 @@ public class GenEntityHandler implements Handler {
 			return data;
 		}
 		
-		if (cutCommand.contains("in")) {
-			String temp = cutHead(cutCommand, "in");
-			temp = cutTail(temp, "to");
+		if (cutCommand.contains(" in ")) {
+			String temp = cutHead(cutCommand, " in ");
+			temp = cutTail(temp, " to ");
 			
 			List<String> columns = Arrays.asList(temp.split(" "));
 			List<Column> columnList = data.getColumns().stream()
@@ -124,8 +124,8 @@ public class GenEntityHandler implements Handler {
 	}
 	
 	private String getPath() {
-		if (command.contains("to")) {
-			return cutHead(command, "to");
+		if (command.contains(" to ")) {
+			return cutHead(command, " to ");
 		}
 		return getDesktopPath();
 	}

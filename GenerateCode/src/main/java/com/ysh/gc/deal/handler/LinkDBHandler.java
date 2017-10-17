@@ -15,8 +15,8 @@ public class LinkDBHandler implements Handler{
 	
 	@Override
 	public Response execute(String command) {
-		String temp = cutHead(command, "database").trim();
-		temp = cutTail(temp, "save").trim();
+		String temp = cutHead(command, " database ");
+		temp = cutTail(temp, " save ");
 		
 		String[] str = temp.split(" ");
 		String url,user,password;

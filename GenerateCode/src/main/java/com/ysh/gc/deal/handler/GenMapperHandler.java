@@ -83,19 +83,19 @@ public class GenMapperHandler implements Handler {
 	}
 	
 	private String getTable() {
-		String table = cutHead(command, "mapper");
-		table = cutTail(table, "as");
-		table = cutTail(table, "in");
-		table = cutTail(table, "to");
+		String table = cutHead(command, " mapper ");
+		table = cutTail(table, " as ");
+		table = cutTail(table, " in ");
+		table = cutTail(table, " to ");
 		
 		return table;
 	}
 	
 	private Optional<String> getAlias() {
-		if (command.contains("as")) {
-			String alias = cutHead(command, "as");
-			alias = cutTail(alias, "in");
-			alias = cutTail(alias, "to");
+		if (command.contains(" as ")) {
+			String alias = cutHead(command, " as ");
+			alias = cutTail(alias, " in ");
+			alias = cutTail(alias, " to ");
 			
 			return Optional.of(alias);
 		}
@@ -103,10 +103,10 @@ public class GenMapperHandler implements Handler {
 	}
 	
 	private List<String> getMethods() {
-		String cutCommand = cutTail(command, "to");
-		if (cutCommand.contains("in")) {
-			String methods = cutHead(cutCommand, "in");
-			methods = cutTail(methods, "to");
+		String cutCommand = cutTail(command, " to ");
+		if (cutCommand.contains(" in ")) {
+			String methods = cutHead(cutCommand, " in ");
+			methods = cutTail(methods, " to ");
 			
 			String[] strs = methods.split(",");
 			return Arrays.asList(strs);
@@ -115,8 +115,8 @@ public class GenMapperHandler implements Handler {
 	}
 	
 	private String getPath() {
-		if (command.contains("to")) {
-			return cutHead(command, "to");
+		if (command.contains(" to ")) {
+			return cutHead(command, " to ");
 		}
 		return getDesktopPath();
 	}

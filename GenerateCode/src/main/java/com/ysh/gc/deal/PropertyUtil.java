@@ -37,7 +37,10 @@ public class PropertyUtil {
 	
 	public Optional<String> get(String key) {
 		String value = properties.getProperty(key);
-		return Optional.ofNullable(value.trim());
+		if (value != null) {
+			return Optional.of(value);
+		}
+		return Optional.empty();
 	}
 	
 	public void set(String key, String value) {
