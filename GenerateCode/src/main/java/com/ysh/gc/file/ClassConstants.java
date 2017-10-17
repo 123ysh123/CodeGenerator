@@ -17,7 +17,7 @@ public class ClassConstants {
 	public static final String field = 
 			  "\n\t/**"
 			+ "\n\t* #{comment}" 
-			+ "\n\t */"
+			+ "\n\t*/"
 			+ "\n\tprivate #{type} #{name};\n";
 	
 	public static final String method =
