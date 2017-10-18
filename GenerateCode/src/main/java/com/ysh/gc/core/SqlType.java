@@ -13,10 +13,10 @@ public enum SqlType {
 	
 	BIT("BIT","Boolean"),
 	INT("INT","Integer"),
-	TINYINT("TINYINT","Integer"),
-	SMALLINT("SMALLINT","Integer"),//整数都转换成Integer
+	TINYINT("TINYINT","Byte"),
+	SMALLINT("SMALLINT","Short"),
 	MEDIUMINT("MEDIUMINT","Integer"),
-	BIGINT("BIGINT","Integer"),
+	BIGINT("BIGINT","Long"),
 	
 	FLOAT("FLOAT","Float"),
 	DOUBLE("DOUBLE","Double"),
@@ -62,6 +62,12 @@ public enum SqlType {
 			return "java.lang.Boolean";
 		case "Integer":
 			return "java.lang.Integer";
+		case "Byte":
+			return "java.lang.Byte";
+		case "Short":
+			return "java.lang.Short";
+		case "Long":
+			return "java.lang.Long";
 		case "Float":
 			return "java.lang.Float";
 		case "Double":

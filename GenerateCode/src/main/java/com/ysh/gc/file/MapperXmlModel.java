@@ -86,14 +86,18 @@ public class MapperXmlModel implements Model{
 	}
 	
 	private String getInsert(MethodData methodData) {
+		List<String> columns = data.getColumns().stream()
+				.filter(item -> !item.getName().equalsIgnoreCase("id"))
+				.map(Column::getName)
+				.collect(toList());
+		
 		String methodName = methodData.getName();
 		String statement = INSERT.replace("#{id}", methodName)
 				.replace("#{table}", methodData.getTableName());
 		
 		if (methodName.equals("insertBatch")) {
-			String params = methodData.getParams().entrySet().stream()
-					.filter(item -> !item.getKey().equalsIgnoreCase("id"))
-					.map(item -> "#{item." + item.getKey() + "}")
+			String params = columns.stream()
+					.map(item -> "#{item." + toFieldName(item) + "}")
 					.collect(joining(","));
 			
 			String values = INSERT_FOREACH.replace("#{param}", params);
@@ -102,9 +106,8 @@ public class MapperXmlModel implements Model{
 			return statement;
 		}
 		
-		String values = methodData.getParams().entrySet().stream()
-				.filter(item -> !item.getKey().equalsIgnoreCase("id"))
-				.map(item -> "#{" + item.getKey() + "}")
+		String values = columns.stream()
+				.map(item -> "#{" + toFieldName(item) + "}")
 				.collect(joining(",", "\n\t\t(", ")"));
 		
 		if (methodName.equals("insert")) {
