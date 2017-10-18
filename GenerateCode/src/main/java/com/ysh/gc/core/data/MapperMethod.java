@@ -5,6 +5,7 @@ import static com.ysh.gc.deal.StringUtils.matches;
 import static com.ysh.gc.deal.Utils.toFieldName;
 import static com.ysh.gc.deal.Utils.toShortClassName;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,6 @@ public class MapperMethod {
 	}
 	
 	private String toParam(MethodData data) {
-		int paramSize = data.getParams().size();
 		String methodName = data.getName();
 		String params = null;
 		
@@ -116,7 +116,13 @@ public class MapperMethod {
 			return clazz + " " + parmName;
 		}
 		
-		params = data.getParams().entrySet().stream().map(item -> {
+		Map<String, Column> paramItems = new HashMap<>(data.getParams());
+		if (matches(methodName, "update\\w+By\\w+")) {
+			paramItems.putAll(data.getReturns());
+		}
+		int paramSize = paramItems.size();
+		
+		params = paramItems.entrySet().stream().map(item -> {
 				String result = "";
 				if (paramSize >=2) {
 					result = "@Param(\"" + item.getKey() + "\") ";
