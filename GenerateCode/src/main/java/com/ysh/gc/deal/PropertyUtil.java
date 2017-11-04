@@ -14,10 +14,16 @@ public class PropertyUtil {
 	public static final String GEN_ENTITY = "gen-entity.properties";
 	public static final String IMPORT = "import.properties";
 	
+	public static Properties entityPros = null;
 	private Properties properties = null;
 	private String file;
 	
 	public PropertyUtil(String propertyFile) {
+		if (propertyFile.equals(GEN_ENTITY) && entityPros != null) {
+			this.properties = entityPros;
+			this.file = propertyFile;
+			return;
+		}
 		this.file = propertyFile;
 		Properties pro = new Properties();
 		InputStream in = PropertyUtil.class.getClassLoader().getResourceAsStream(propertyFile);
@@ -27,7 +33,10 @@ public class PropertyUtil {
 		} catch (IOException e) {
 			System.out.println("error:" + e.getMessage());
 		}
-		this.properties = pro;
+		properties = pro;
+		if (propertyFile.equals(GEN_ENTITY)) {
+			entityPros = properties;
+		}
 	}
 	
 	public Map<String, String> getProperties() {
@@ -51,6 +60,9 @@ public class PropertyUtil {
 			outputStream = new FileOutputStream(sourceFile);
 			properties.setProperty(key, value);
 			properties.store(outputStream, Utils.getCurrentDate());
+			
+			outputStream.flush();
+			outputStream.close();
 		} catch (IOException e) {
 			System.out.println("error:" + e.getMessage());
 		}

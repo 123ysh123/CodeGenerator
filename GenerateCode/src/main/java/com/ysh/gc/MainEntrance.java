@@ -18,7 +18,7 @@ public class MainEntrance {
 	public static void main(String[] args) {
 		welcome();
 		String command = null;
-		while (!(command = scan.nextLine()).equals("exit") && command.length() > 0) {
+		while (!(command = scan.nextLine()).equals("exit")) {
 			if (command.equals("help")) {
 				printCommand();
 				continue;
@@ -47,6 +47,9 @@ public class MainEntrance {
 			if (command.startsWith("gen mapper")) {
 				response = new GenMapperHandler().execute(command);
 				dealResponse(response);
+				continue;
+			}
+			if (command.length() == 0) {
 				continue;
 			}
 			System.out.println("error command!");
