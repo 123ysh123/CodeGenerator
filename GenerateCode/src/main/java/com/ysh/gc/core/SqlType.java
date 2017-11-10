@@ -3,6 +3,8 @@ package com.ysh.gc.core;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.omg.CORBA.INTERNAL;
+
 import com.ysh.gc.exception.UnSupportedTypeException;
 
 public enum SqlType {
@@ -13,6 +15,7 @@ public enum SqlType {
 	
 	BIT("BIT","Boolean"),
 	INT("INT","Integer"),
+	INT_UNSIGNED("INT UNSIGNED","Integer"),
 	TINYINT("TINYINT","Byte"),
 	SMALLINT("SMALLINT","Short"),
 	MEDIUMINT("MEDIUMINT","Integer"),
